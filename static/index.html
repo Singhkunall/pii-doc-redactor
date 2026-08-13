@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShieldDOCS - Format-Preserving PII Redaction Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-group">
+                <div class="logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1>ShieldDOCS <span class="badge-tag">PII Redactor</span></h1>
+                    <p class="subtitle">Format-Preserving Word Document & Text Redaction Engine</p>
+                </div>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span>Engine Active</span>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="card upload-card" id="upload-section">
+                <div class="drop-zone" id="drop-zone">
+                    <div class="upload-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </div>
+                    <h3>Drag & Drop your Word Document (.docx) or Text file here</h3>
+                    <p class="drop-hint">Supports .docx files with full run styling preservation (bold, italic, tables, colors)</p>
+                    <label class="btn btn-primary browse-btn">
+                        Browse Files
+                        <input type="file" id="file-input" accept=".docx,.txt" hidden>
+                    </label>
+                </div>
+                <div class="file-info-bar hidden" id="file-info-bar">
+                    <div class="file-details">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                        <span id="selected-filename">sample.docx</span>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" id="change-file-btn">Change File</button>
+                </div>
+            </section>
+
+            <!-- Dashboard Controls & Summary -->
+            <section class="dashboard-grid hidden" id="dashboard-section">
+                <!-- Stat Cards -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Total PII Detected</span>
+                        <span class="stat-icon icon-total">🛡️</span>
+                    </div>
+                    <div class="stat-value" id="stat-total-count">0</div>
+                    <div class="stat-sub">Across document content & tables</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Names & Roles</span>
+                        <span class="stat-icon icon-people">👤</span>
+                    </div>
+                    <div class="stat-value" id="stat-names-count">0</div>
+                    <div class="stat-sub">Person & company entities</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Contact & Identifiers</span>
+                        <span class="stat-icon icon-contact">📧</span>
+                    </div>
+                    <div class="stat-value" id="stat-contact-count">0</div>
+                    <div class="stat-sub">Emails, phones, SSNs, IP addresses</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Dates & Addresses</span>
+                        <span class="stat-icon icon-location">📍</span>
+                    </div>
+                    <div class="stat-value" id="stat-location-count">0</div>
+                    <div class="stat-sub">DOB & registered office locations</div>
+                </div>
+            </section>
+
+            <!-- Controls Bar -->
+            <section class="card controls-card hidden" id="controls-section">
+                <div class="controls-wrapper">
+                    <div class="filter-group">
+                        <label class="control-label">Categories to Redact:</label>
+                        <div class="category-chips" id="category-chips">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                    <div class="seed-group">
+                        <label class="control-label" for="salt-input">Seed Salt (Consistent Mapping):</label>
+                        <input type="text" id="salt-input" class="text-input" value="default" placeholder="e.g. secret_key_1">
+                    </div>
+                    <div class="action-group">
+                        <button class="btn btn-success" id="download-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Download Redacted DOCX
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Detected PII Entity Inspector Table -->
+            <section class="card table-card hidden" id="table-section">
+                <div class="card-header">
+                    <h2>Detected Entities & Fake Replacements</h2>
+                    <span class="entity-count-tag" id="table-entity-count">0 items</span>
+                </div>
+                <div class="table-container">
+                    <table class="entity-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Category</th>
+                                <th>Original Value</th>
+                                <th>Generated Replacement</th>
+                                <th>Position</th>
+                            </tr>
+                        </thead>
+                        <tbody id="entity-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Side-by-Side Live Document Preview -->
+            <section class="card preview-card hidden" id="preview-section">
+                <div class="card-header">
+                    <h2>Live Document Comparison</h2>
+                    <div class="preview-tabs">
+                        <button class="tab-btn active" data-tab="split">Side-by-Side View</button>
+                        <button class="tab-btn" data-tab="original">Original Only</button>
+                        <button class="tab-btn" data-tab="redacted">Redacted Only</button>
+                    </div>
+                </div>
+                <div class="preview-split-container" id="preview-container">
+                    <div class="preview-pane" id="pane-original">
+                        <div class="pane-header">Original Document (PII Highlighted)</div>
+                        <div class="pane-content" id="content-original"></div>
+                    </div>
+                    <div class="preview-pane" id="pane-redacted">
+                        <div class="pane-header">Redacted Document (Fake Values Substituted)</div>
+                        <div class="pane-content" id="content-redacted"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>ShieldDOCS PII Redaction Engine &copy; 2026 | Format-Preserving DOCX Redactor</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
