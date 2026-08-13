@@ -139,8 +139,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: formData
             });
             if (!res.ok) {
-                const err = await res.json();
-                alert(`Error analyzing file: ${err.detail || res.statusText}`);
+                let errMsg = res.statusText || 'Analysis failed';
+                try {
+                    const err = await res.json();
+                    if (err && err.detail) errMsg = err.detail;
+                } catch (_) {
+                    try {
+                        const txt = await res.text();
+                        if (txt) errMsg = txt;
+                    } catch (_) {}
+                }
+                alert(`Error analyzing file: ${errMsg}`);
                 return;
             }
             analysisResult = await res.json();
@@ -295,8 +304,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!res.ok) {
-                const err = await res.json();
-                alert(`Redaction download failed: ${err.detail || res.statusText}`);
+                let errMsg = res.statusText || 'Redaction download failed';
+                try {
+                    const err = await res.json();
+                    if (err && err.detail) errMsg = err.detail;
+                } catch (_) {
+                    try {
+                        const txt = await res.text();
+                        if (txt) errMsg = txt;
+                    } catch (_) {}
+                }
+                alert(`Redaction download failed: ${errMsg}`);
                 return;
             }
 

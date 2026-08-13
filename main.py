@@ -17,7 +17,18 @@ from pii_engine import (
     process_docx_preserve_formatting
 )
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="PII Detection & DOCX Redactor API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["Content-Disposition"]
+)
 
 # Mount static directory for frontend
 static_dir = os.path.join(os.path.dirname(__file__), "static")
