@@ -10,4 +10,4 @@ COPY . .
 ENV PORT=10000
 EXPOSE 10000
 
-CMD ["python", "main.py"]
+CMD sh -c "gunicorn main:app -w 2 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:${PORT:-10000}"
