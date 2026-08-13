@@ -66,11 +66,11 @@ async def analyze_file(
     file: UploadFile = File(...),
     salt: str = Form("default")
 ):
-    """Analyze uploaded DOCX/TXT file for PII entities."""
+    """Analyze uploaded DOCX/TXT file for PII entities and generate instant preview."""
     filename = file.filename or "uploaded_document"
     contents = await file.read()
     
-    if filename.endswith(".docx"):
+    if filename.lower().endswith(".docx"):
         try:
             full_text = extract_docx_text(contents)
         except Exception as e:
@@ -99,12 +99,27 @@ async def analyze_file(
             "end": e
         })
         
+    # Generate HTML previews in single request for instant loading
+    orig_html = full_text
+    redacted_html = full_text
+    spans_desc = sorted(spans, key=lambda x: x[0], reverse=True)
+    
+    for s, e, cat, val in spans_desc:
+        fake_val = mapper.get(cat, val)
+        badge_orig = f'<mark class="pii-badge badge-{cat.lower()}" title="{cat}">{val}</mark>'
+        badge_redacted = f'<mark class="pii-badge redacted-badge badge-{cat.lower()}" title="Redacted from: {val}">{fake_val}</mark>'
+        
+        orig_html = orig_html[:s] + badge_orig + orig_html[e:]
+        redacted_html = redacted_html[:s] + badge_redacted + redacted_html[e:]
+        
     return {
         "filename": filename,
         "total_pii_found": len(spans),
         "summary": summary,
         "details": details,
-        "full_text": full_text
+        "full_text": full_text,
+        "original_html": orig_html.replace("\n", "<br>"),
+        "redacted_html": redacted_html.replace("\n", "<br>")
     }
 
 @app.post("/api/preview")

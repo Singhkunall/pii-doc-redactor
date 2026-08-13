@@ -159,10 +159,15 @@ document.addEventListener('DOMContentLoaded', () => {
             renderCategoryChips(analysisResult.summary);
             renderEntityTable(analysisResult.details);
 
-            // 2. Fetch Live Preview
-            await updatePreview();
+            // Render Preview HTML directly from single response (Instant 1-shot loading!)
+            if (analysisResult.original_html) {
+                contentOriginal.innerHTML = analysisResult.original_html;
+            }
+            if (analysisResult.redacted_html) {
+                contentRedacted.innerHTML = analysisResult.redacted_html;
+            }
 
-            // Show sections
+            // Show sections instantly
             dashboardSection.classList.remove('hidden');
             controlsSection.classList.remove('hidden');
             tableSection.classList.remove('hidden');
